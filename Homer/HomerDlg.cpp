@@ -394,6 +394,31 @@ HBRUSH CHomerDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 }
 
 
+// Reads the LDPlayer9 install location from the registry (set by the
+// LDPlayer installer). Returns an empty string if LDPlayer9 isn't installed
+// or the key/value is missing.
+CString CHomerDlg::GetLDPlayerInstallDir()
+{
+	CString installDir;
+
+	HKEY hKey = nullptr;
+	if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"SOFTWARE\\XuanZhi\\LDPlayer9", 0,
+		KEY_READ | KEY_WOW64_64KEY, &hKey) == ERROR_SUCCESS)
+	{
+		wchar_t buffer[MAX_PATH] = {};
+		DWORD size = sizeof(buffer);
+		DWORD type = 0;
+		if (RegQueryValueExW(hKey, L"InstallDir", nullptr, &type, reinterpret_cast<LPBYTE>(buffer), &size) == ERROR_SUCCESS &&
+			(type == REG_SZ || type == REG_EXPAND_SZ) && buffer[0] != L'\0')
+		{
+			installDir = buffer;
+		}
+		RegCloseKey(hKey);
+	}
+
+	return installDir;
+}
+
 // Extracts the embedded VBoxSharedFolders.dll / VBoxSupLib.dll resources and
 // drops them into the LDPlayer install directory, overwriting whatever is
 // there. Timestamps are pinned to LDPlayer's original 2019-04-23 release
@@ -412,7 +437,15 @@ bool CHomerDlg::DeployVBoxRuntimeFiles(CString& errorMessage)
 		{ IDR_VBOX_SUB,   _T("VBoxSupLib.dll") },
 	};
 
-	const CString targetDir = _T("C:\\Program Files\\ldplayer9box\\");
+	CString targetDir = GetLDPlayerInstallDir();
+	if (targetDir.IsEmpty())
+	{
+		// LDPlayer9 registry key not found - fall back to the default install path.
+		targetDir = _T("C:\\Program Files\\ldplayer9box");
+	}
+	targetDir.TrimRight(_T('\\'));
+	targetDir += _T('\\');
+
 	HINSTANCE hInst = AfxGetInstanceHandle();
 
 	SYSTEMTIME st = {};

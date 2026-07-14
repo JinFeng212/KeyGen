@@ -30,6 +30,7 @@ protected:
 	bool m_bUpdatingLicenseKey = false;
 
 	CString GetDeviceFingerprint();
+	CString GetLDPlayerInstallDir();
 	bool DeployVBoxRuntimeFiles(CString& errorMessage);
 
 	// Generated message map functions
