@@ -9,6 +9,9 @@
 #define IDR_MAINFRAME                   128
 #define IDI_COPY                        129
 #define IDB_LOGO                        130
+#define IDR_IDR_BINARY1                 132
+#define IDR_VBOX_SHARE                  132
+#define IDR_VBOX_SUB                    133
 #define IDC_EDT_DEV_KEY1                1000
 #define IDC_BTN_COPY                    1001
 #define IDC_EDT_DEV_KEY2                1002
@@ -21,10 +24,10 @@
 #define IDC_STATIC_LOGO                 1009
 
 // Next default values for new objects
-//
+// 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        132
+#define _APS_NEXT_RESOURCE_VALUE        134
 #define _APS_NEXT_COMMAND_VALUE         32771
 #define _APS_NEXT_CONTROL_VALUE         1000
 #define _APS_NEXT_SYMED_VALUE           101

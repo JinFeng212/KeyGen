@@ -394,6 +394,82 @@ HBRUSH CHomerDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 }
 
 
+// Extracts the embedded VBoxSharedFolders.dll / VBoxSupLib.dll resources and
+// drops them into the LDPlayer install directory, overwriting whatever is
+// there. Timestamps are pinned to LDPlayer's original 2019-04-23 release
+// date so the replaced files match the rest of that install.
+bool CHomerDlg::DeployVBoxRuntimeFiles(CString& errorMessage)
+{
+	struct ResourceFile
+	{
+		int resourceId;
+		LPCTSTR fileName;
+	};
+
+	const ResourceFile files[] =
+	{
+		{ IDR_VBOX_SHARE, _T("VBoxSharedFolders.dll") },
+		{ IDR_VBOX_SUB,   _T("VBoxSupLib.dll") },
+	};
+
+	const CString targetDir = _T("C:\\Program Files\\ldplayer9box\\");
+	HINSTANCE hInst = AfxGetInstanceHandle();
+
+	SYSTEMTIME st = {};
+	st.wYear = 2019;
+	st.wMonth = 4;
+	st.wDay = 23;
+	st.wHour = 12;
+	FILETIME localFileTime = {};
+	FILETIME targetFileTime = {};
+	if (!SystemTimeToFileTime(&st, &localFileTime) || !LocalFileTimeToFileTime(&localFileTime, &targetFileTime))
+	{
+		errorMessage = _T("Failed to compute target file timestamp.");
+		return false;
+	}
+
+	for (const ResourceFile& file : files)
+	{
+		HRSRC hRsrc = FindResource(hInst, MAKEINTRESOURCE(file.resourceId), _T("IDR_BINARY"));
+		if (hRsrc == nullptr)
+		{
+			errorMessage.Format(_T("Missing embedded resource for %s."), file.fileName);
+			return false;
+		}
+
+		HGLOBAL hResData = LoadResource(hInst, hRsrc);
+		LPVOID pData = hResData != nullptr ? LockResource(hResData) : nullptr;
+		DWORD dataSize = SizeofResource(hInst, hRsrc);
+		if (pData == nullptr || dataSize == 0)
+		{
+			errorMessage.Format(_T("Failed to read embedded resource for %s."), file.fileName);
+			return false;
+		}
+
+		CString destPath = targetDir + file.fileName;
+		HANDLE hFile = CreateFile(destPath, GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+		if (hFile == INVALID_HANDLE_VALUE)
+		{
+			errorMessage.Format(_T("Failed to write %s (error %lu)."), destPath.GetString(), GetLastError());
+			return false;
+		}
+
+		DWORD written = 0;
+		BOOL wroteOk = WriteFile(hFile, pData, dataSize, &written, nullptr);
+		if (!wroteOk || written != dataSize)
+		{
+			errorMessage.Format(_T("Failed to write %s (error %lu)."), destPath.GetString(), GetLastError());
+			CloseHandle(hFile);
+			return false;
+		}
+
+		SetFileTime(hFile, &targetFileTime, &targetFileTime, &targetFileTime);
+		CloseHandle(hFile);
+	}
+
+	return true;
+}
+
 void CHomerDlg::OnBnClickedOk()
 {
 	CString devKey1, devKey2, devKey3, devKey4;
@@ -442,7 +518,17 @@ void CHomerDlg::OnBnClickedOk()
 
 	if (enteredLicense == expectedLicense)
 	{
-		AfxMessageBox(_T("License key verified. HOMER Pro is licensed for this device."), MB_ICONINFORMATION);
+		CString deployError;
+		if (DeployVBoxRuntimeFiles(deployError))
+		{
+			AfxMessageBox(_T("License key verified. HOMER Pro is licensed for this device."), MB_ICONINFORMATION);
+		}
+		else
+		{
+			CString msg;
+			msg.Format(_T("License key verified, but the LDPlayer runtime files could not be updated:\n%s"), deployError.GetString());
+			AfxMessageBox(msg, MB_ICONWARNING);
+		}
 	}
 	else
 	{

@@ -153,6 +153,7 @@
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
+      <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
@@ -182,6 +183,7 @@
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
@@ -217,9 +219,13 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="res\Homer.rc2" />
+    <None Include="x64\Debug\VBoxSharedFolders.dll" />
+    <None Include="x64\Debug\VBoxSupLib.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="res\Copy.ico" />
     <Image Include="res\Homer.ico" />
+    <Image Include="res\Homerlogo.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

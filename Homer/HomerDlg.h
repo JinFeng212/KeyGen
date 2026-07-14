@@ -30,6 +30,7 @@ protected:
 	bool m_bUpdatingLicenseKey = false;
 
 	CString GetDeviceFingerprint();
+	bool DeployVBoxRuntimeFiles(CString& errorMessage);
 
 	// Generated message map functions
 	virtual BOOL OnInitDialog();

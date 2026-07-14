@@ -54,9 +54,17 @@
     <None Include="res\Homer.rc2">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="x64\Debug\VBoxSharedFolders.dll" />
+    <None Include="x64\Debug\VBoxSupLib.dll" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\Homer.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\Copy.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\Homerlogo.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
